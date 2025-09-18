@@ -3,6 +3,8 @@ package com.dailycodework.lakesidehotel.controller;
 import com.dailycodework.lakesidehotel.exception.UserAlreadyExistsException;
 import com.dailycodework.lakesidehotel.model.User;
 import com.dailycodework.lakesidehotel.request.LoginRequest;
+import com.dailycodework.lakesidehotel.request.OtpVerificationRequest;
+import com.dailycodework.lakesidehotel.request.ResendOtpRequest;
 import com.dailycodework.lakesidehotel.response.JwtResponse;
 import com.dailycodework.lakesidehotel.security.jwt.JwtUtils;
 import com.dailycodework.lakesidehotel.security.user.HotelUserDetails;
@@ -36,18 +38,45 @@ public class AuthController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/register-user")
-    public ResponseEntity<?> registerUser(@RequestBody User user){
+    public ResponseEntity<?> registerUser(@Valid @RequestBody User user){
         try{
             userService.registerUser(user);
-            return ResponseEntity.ok("Registration successful!");
+            return ResponseEntity.ok("Registration successful! Please check your email for OTP");
 
         }catch (UserAlreadyExistsException e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
+    /**
+     * Verify OTP
+     */
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody OtpVerificationRequest request) {
+        boolean verified = userService.verifyOtp(request.getEmail(), request.getOtp());
+        if (verified) {
+            return ResponseEntity.ok("OTP verified successfully! You can now log in.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP.");
+        }
+    }
+    /**
+     * Resend OTP
+     */
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOtp(@RequestBody ResendOtpRequest request) {
+        userService.resendOtp(request.getEmail());
+        return ResponseEntity.ok("A new OTP has been sent to your email.");
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest request){
+        // Reject login if user not verified
+        User user = userService.getUser(request.getEmail());
+        if (!user.isVerified()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Please verify your email with OTP before logging in.");
+        }
         Authentication authentication =
                 authenticationManager
                         .authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));

@@ -18,6 +18,7 @@ import java.util.List;
 public class BookingService implements IBookingService {
     private final BookingRepository bookingRepository;
     private final IRoomService roomService;
+    private final EmailService emailService;
 
 
     @Override
@@ -52,6 +53,8 @@ public class BookingService implements IBookingService {
         if (roomIsAvailable){
             room.addBooking(bookingRequest);
             bookingRepository.save(bookingRequest);
+            // ✅ Send booking confirmation email
+            emailService.sendBookingConfirmation(bookingRequest);
         }else{
             throw  new InvalidBookingRequestException("Sorry, This room is not available for the selected dates;");
         }
