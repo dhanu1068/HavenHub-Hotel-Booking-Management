@@ -29,6 +29,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("https://havenhub-4rtzahg4k-dhanu1068s-projects.vercel.app");
+        config.addAllowedOrigin("https://havenhub-8ea4ts8y9-dhanu1068s-projects.vercel.app");
         config.addAllowedOrigin("https://havenhub-app.vercel.app");
         config.addAllowedOrigin("http://localhost:5173");
         config.setAllowedHeaders(Arrays.asList(
