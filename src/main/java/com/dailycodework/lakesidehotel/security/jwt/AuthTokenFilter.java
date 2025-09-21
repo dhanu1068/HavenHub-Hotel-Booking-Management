@@ -34,6 +34,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
+
+        // Skip JWT validation for public endpoints
+        if (path.startsWith("/auth/") || path.startsWith("/rooms/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
 
 
