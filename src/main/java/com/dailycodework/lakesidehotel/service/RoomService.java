@@ -5,6 +5,7 @@ import com.dailycodework.lakesidehotel.exception.ResourceNotFoundException;
 import com.dailycodework.lakesidehotel.model.Room;
 import com.dailycodework.lakesidehotel.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,20 +22,21 @@ import java.util.Optional;
  * @author Simpson Alfred
  */
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RoomService implements IRoomService {
     private final RoomRepository roomRepository;
     @Override
-    public Room addNewRoom(MultipartFile file, String roomType, BigDecimal roomPrice) throws SQLException, IOException {
+    public Room addNewRoom( String roomType, BigDecimal roomPrice) throws SQLException, IOException {
         Room room = new Room();
         room.setRoomType(roomType);
         room.setRoomPrice(roomPrice);
-        if (!file.isEmpty()){
-            byte[] photoBytes = file.getBytes();
-            Blob photoBlob = new SerialBlob(photoBytes);
-            room.setPhoto(photoBlob);
-        }
+//        if (!file.isEmpty()){
+//            byte[] photoBytes = file.getBytes();
+//            Blob photoBlob = new SerialBlob(photoBytes);
+//            room.setPhoto(photoBlob);
+//        }
         return roomRepository.save(room);
     }
 
@@ -49,17 +51,35 @@ public class RoomService implements IRoomService {
     }
 
     @Override
-    public byte[] getRoomPhotoByRoomId(Long roomId) throws SQLException {
-        Optional<Room> theRoom = roomRepository.findById(roomId);
-        if(theRoom.isEmpty()){
-            throw new ResourceNotFoundException("Sorry, Room not found!");
-        }
-        Blob photoBlob = theRoom.get().getPhoto();
-        if(photoBlob != null){
-            return photoBlob.getBytes(1, (int) photoBlob.length());
-        }
-        return null;
+    public String getRoomPhotoByRoomId(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sorry, Room not found!"));
+
+        return room.getImageUrl(); // return Cloudinary URL
     }
+
+
+
+
+
+
+
+
+
+
+
+//    @Override
+//    public byte[] getRoomPhotoByRoomId(Long roomId) throws SQLException {
+//        Optional<Room> theRoom = roomRepository.findById(roomId);
+//        if(theRoom.isEmpty()){
+//            throw new ResourceNotFoundException("Sorry, Room not found!");
+//        }
+//        Blob photoBlob = theRoom.get().getPhoto();
+//        if(photoBlob != null){
+//            return photoBlob.getBytes(1, (int) photoBlob.length());
+//        }
+//        return null;
+//    }
 
     @Override
     public void deleteRoom(Long roomId) {
@@ -70,17 +90,17 @@ public class RoomService implements IRoomService {
     }
 
     @Override
-    public Room updateRoom(Long roomId, String roomType, BigDecimal roomPrice, byte[] photoBytes) {
+    public Room updateRoom(Long roomId, String roomType, BigDecimal roomPrice, String imageUrl) {  //byte[] photoBytes
         Room room = roomRepository.findById(roomId).get();
         if (roomType != null) room.setRoomType(roomType);
         if (roomPrice != null) room.setRoomPrice(roomPrice);
-        if (photoBytes != null && photoBytes.length > 0) {
-            try {
-                room.setPhoto(new SerialBlob(photoBytes));
-            } catch (SQLException ex) {
-                throw new InternalServerException("Fail updating room");
-            }
-        }
+        if (imageUrl != null) room.setImageUrl(imageUrl); // update Cloudinary URL
+//            try {
+//                room.setPhoto(new SerialBlob(photoBytes));
+//            } catch (SQLException ex) {
+//                throw new InternalServerException("Fail updating room");
+//            }
+
        return roomRepository.save(room);
     }
 
@@ -92,5 +112,14 @@ public class RoomService implements IRoomService {
     @Override
     public List<Room> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate, String roomType) {
         return roomRepository.findAvailableRoomsByDatesAndType(checkInDate, checkOutDate, roomType);
+    }
+
+    @Override
+    public void updateRoomPhoto(Long id, String imageUrl) {
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
+        room.setImageUrl(imageUrl);  // update the Cloudinary URL
+        roomRepository.save(room);    // save changes
+
     }
 }

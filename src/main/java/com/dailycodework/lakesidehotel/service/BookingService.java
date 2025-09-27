@@ -53,7 +53,7 @@ public class BookingService implements IBookingService {
         if (roomIsAvailable){
             room.addBooking(bookingRequest);
             bookingRepository.save(bookingRequest);
-            // ✅ Send booking confirmation email
+            //  Send booking confirmation email
             emailService.sendBookingConfirmation(bookingRequest);
         }else{
             throw  new InvalidBookingRequestException("Sorry, This room is not available for the selected dates;");
