@@ -3,6 +3,7 @@ import com.dailycodework.lakesidehotel.model.BookedRoom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,6 +12,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Async
     public void sendOtpEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
@@ -23,7 +25,7 @@ public class EmailService {
         );
         mailSender.send(message);
     }
-
+    @Async
     public void sendBookingConfirmation(BookedRoom booking) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(booking.getGuestEmail());
