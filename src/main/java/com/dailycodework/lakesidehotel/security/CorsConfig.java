@@ -17,34 +17,59 @@ import java.util.Arrays;
  */
 
 @Configuration
-@EnableWebMvc
+//@EnableWebMvc
 public class CorsConfig {
 
-    private static final Long MAX_AGE = 3600L;
-    private static final int CORS_FILTER_ORDER = -102;
+//    private static final Long MAX_AGE = 3600L;
+//    private static final int CORS_FILTER_ORDER = -102;
 
-    @Bean
-    public FilterRegistrationBean corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("https://havenhub-4rtzahg4k-dhanu1068s-projects.vercel.app");
-        config.addAllowedOrigin("https://havenhub-8ea4ts8y9-dhanu1068s-projects.vercel.app");
-        config.addAllowedOrigin("https://havenhub-app.vercel.app");
-        config.addAllowedOrigin("http://localhost:5175");
-        config.setAllowedHeaders(Arrays.asList(
-                HttpHeaders.AUTHORIZATION,
-                HttpHeaders.CONTENT_TYPE,
-                HttpHeaders.ACCEPT));
-        config.setAllowedMethods(Arrays.asList(
-                HttpMethod.GET.name(),
-                HttpMethod.POST.name(),
-                HttpMethod.PUT.name(),
-                HttpMethod.DELETE.name()));
-        config.setMaxAge(MAX_AGE);
-        source.registerCorsConfiguration("/**", config);
-        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-        bean.setOrder(CORS_FILTER_ORDER);
-        return bean;
-    }
+//    @Bean
+//    public FilterRegistrationBean corsFilter() {
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowCredentials(true);
+//        config.addAllowedOrigin("https://havenhub-4rtzahg4k-dhanu1068s-projects.vercel.app");
+//        config.addAllowedOrigin("https://havenhub-8ea4ts8y9-dhanu1068s-projects.vercel.app");
+//        config.addAllowedOrigin("https://havenhub-app.vercel.app");
+//        config.addAllowedOrigin("http://localhost:5173");
+//        config.setAllowedHeaders(Arrays.asList(
+//                HttpHeaders.AUTHORIZATION,
+//                HttpHeaders.CONTENT_TYPE,
+//                HttpHeaders.ACCEPT));
+//        config.setAllowedMethods(Arrays.asList(
+//                HttpMethod.GET.name(),
+//                HttpMethod.POST.name(),
+//                HttpMethod.PUT.name(),
+//                HttpMethod.DELETE.name()));
+//        config.setMaxAge(MAX_AGE);
+//        source.registerCorsConfiguration("/**", config);
+//        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+//        bean.setOrder(CORS_FILTER_ORDER);
+//        return bean;
+//    }
+@Bean
+public CorsFilter corsFilter() {
+
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+    CorsConfiguration config = new CorsConfiguration();
+
+    config.setAllowCredentials(true);
+
+    config.setAllowedOriginPatterns(Arrays.asList(
+            "https://*.vercel.app",
+            "http://localhost:5174"
+    ));
+
+    config.addAllowedHeader("*");
+
+    config.addAllowedMethod("*");
+
+    source.registerCorsConfiguration("/**", config);
+
+    return new CorsFilter(source);
+}
+
+
 }
